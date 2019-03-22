@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# read_RPM.py
-# 2016-01-20
-# Public Domain
-
 import time
 import pigpio # http://abyz.co.uk/rpi/pigpio/python.html
 import numpy
@@ -33,11 +29,8 @@ class reader:
          self._lastpwm_on = tick
          
       self._lastpwm = tick
-      self._laston = None
-      self._lastgood = None
       self._lastgoods = []
-      self._lastgoodsduty = []
-      self._lastevent = 0
+      self._lastevent = None
       self._lastgoodevent = 0
       self._lastCalculate = 0
       self._lastCalculateduty = 0
@@ -56,19 +49,15 @@ class reader:
          if level == 2:
             if tick - self._lastpwm > self.WATCHDOG * 1000 / 2:
                if self._pwm_on:
-                  self._lastgoodsduty.append(100)
+                  self._duty = 100
                else:
-                  self._lastgoodsduty.append(0)
+                  self._duty = 0
          else:
             if not self._pwm_on:
-               self._lastgoodsduty.append((tick - self._lastpwm) / (tick - self._lastpwm_on) * 100)
+               self._duty = (tick - self._lastpwm) / (tick - self._lastpwm_on) * 100
                self._lastpwm_on = tick
             self._lastpwm = tick
-            self._laston = None
-            self._lastgood = None
-         if tick - self._lastCalculateduty > self.WATCHDOG * 1000 and len(self._lastgoodsduty) > 0:
-            self._calculateduty() 
-            self._lastCalculateduty = tick
+            self._lastevent = None
       except:
          print("Unexpected error:", sys.exc_info()[0])
          traceback.print_exc()
@@ -76,26 +65,21 @@ class reader:
             
    def _sig(self, gpio, level, tick):
       try:
-         if self._duty == 0 and tick - self._lastpwm > self.WATCHDOG * 1000:
-            self._rpm = None
-         elif self._duty > 0 and self._duty < 100 and tick - self._lastevent > self.WATCHDOG * 1000:
-            self._rpm = -1
-         elif tick - self._lastgoodevent > self.WATCHDOG * 1000:
-            self._rpm = 0
-         if level == 1:
-            self._laston = tick
-            self._lastevent = tick
-         elif level == 0 and self._laston is not None:
-            diff = tick - self._laston
-            if diff > 100 and diff < 3000:
-               self._lastgoodevent = tick
-               if self._lastgood is not None:
-                  self._lastgoods.append(self._laston - self._lastgood)
-                  self._lastgood = self._laston
-                  self._laston = None                     
+         if level == 2:
+            if bool(self.pi.read(self.rpmgpio)):
+               if self._duty > 0:
+                  self._rpm = 0
                else:
-                  self._lastgood = self._laston
-
+                  self._rpm = None
+            else:
+               self._rpm = -1
+         else:
+            if self._pwm_on and bool(self.pi.read(self.pwmgpio)) and tick - self._lastpwm > 1000:
+               if self._lastevent is not None:
+                  if tick - self._lastevent > 5000:
+                     self._lastgoods.append(tick - self._lastevent)
+               self._lastevent = tick
+            
             if tick - self._lastCalculate > self.WATCHDOG * 1000 and len(self._lastgoods) > self.SAMPLES:
                self._calculate()
                self._lastCalculate = tick
@@ -105,30 +89,10 @@ class reader:
          traceback.print_exc()
          pass
          
-   def _calculateduty(self):
-      elements = self._lastgoodsduty.copy()
-      self._lastgoodsduty = []
-      #print("copy:{}".format(len(copy)))
-      #print("elements:{}".format(elements))
-
-      self._duty = numpy.mean(elements)
-               
    def _calculate(self):
-      #, dtype=numpy.float64, , dtype=numpy.int32
       elements = self._lastgoods.copy()
       self._lastgoods = []
-      #print("copy:{}".format(len(copy)))
-      #print("elements:{}".format(elements))
-
-      mean = numpy.mean(elements)
-      #sd = numpy.std(elements, ddof=1)
-      
-      #print("count: {:10}, mean:{:10}, sd {:10}".format(len(elements), mean, sd))
-
-      #final_list = [x for x in elements if (x > 0) and (x < mean + sd) and (x > mean - sd)]        
-      #print("final_list:{}".format(final_list))
-      #self._rpm = 1 / (numpy.mean(final_list) / 1000000) / 4 * 60
-      self._rpm = 1 / (mean / 1000000) / 4 * 60
+      self._rpm = 1 / (numpy.mean(elements) / 1000000) / 4 * 60
          
          
    def get_RPM(self):
