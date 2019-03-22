@@ -4,6 +4,7 @@ For GPIO, we have to deal with that:
 
 ![Fan_PWM_piscope](https://user-images.githubusercontent.com/46988275/54840986-a0584e00-4ca4-11e9-8593-cf068c1db6b0.png)
 
+To do the trick, I get milliseconds between bit switch when it happens after 5ms. This happens 4 times by rotation.
 
 Schemas
 
