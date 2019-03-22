@@ -72,7 +72,7 @@ class reader:
             else:
                self._rpm = -1
          else:
-            if self._pwm_on and bool(self.pi.read(self.pwmgpio)) and tick - self._lastpwm > 1000:
+            if self._pwm_on and bool(self.pi.read(self.pwmgpio)) and tick - self._lastpwm > 500:
                if self._lastevent is not None:
                   if tick - self._lastevent > 5000:
                      self._lastgoods.append(tick - self._lastevent)
