@@ -64,6 +64,7 @@ class reader:
    def _sig(self, gpio, level, tick):
       try:
          if level == 2:
+            self._lastgoods = []
             if bool(self.pi.read(self.rpmgpio)):
                if self._duty > 0:
                   self._rpm = 0
@@ -72,13 +73,13 @@ class reader:
             else:
                self._rpm = -1
          else:
-            if self._pwm_on and bool(self.pi.read(self.pwmgpio)) and tick - self._lastpwm > 500:
+            if self._pwm_on and bool(self.pi.read(self.pwmgpio)) and abs(tick - self._lastpwm) > 500:
                if self._lastevent is not None:
                   if tick - self._lastevent > 5000:
                      self._lastgoods.append(tick - self._lastevent)
                self._lastevent = tick
             
-            if tick - self._lastCalculate > self.WATCHDOG * 1000 and len(self._lastgoods) > self.SAMPLES:
+            if abs(tick - self._lastCalculate) > self.WATCHDOG * 1000 and len(self._lastgoods) > self.SAMPLES:
                self._calculate()
                self._lastCalculate = tick
                      
