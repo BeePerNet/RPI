@@ -115,6 +115,10 @@ class reader:
          return "Duty: {:3.3f}%: Fan critical: 0 RPM".format(self._duty)
       else:
          return "Duty: {:3.3f}%: {:6.2f} RPM".format(self._duty, self._rpm)
+         
+   def stop(self):
+      self.cancel()
+      self.pi.stop()
       
 
 if __name__ == "__main__":
@@ -137,7 +141,5 @@ if __name__ == "__main__":
          
    finally:
 
-      p.cancel()
-
-      pi.stop()
+      p.stop()
 
