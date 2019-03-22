@@ -17,12 +17,11 @@ class reader:
       self.rpmgpio = rpmgpio
       self.pwmgpio = pwmgpio
 
-      tick = self.pi.get_current_tick()
-
       self._rpm = None
       self._duty = 0
 
       self._pwm_on = bool(self.pi.read(self.pwmgpio))
+      tick = self.pi.get_current_tick()
       self._lastpwm_on = 0
       if self._pwm_on:
          self._duty = 100
@@ -33,7 +32,6 @@ class reader:
       self._lastevent = None
       self._lastgoodevent = 0
       self._lastCalculate = 0
-      self._lastCalculateduty = 0
       
       self.pi.set_mode(rpmgpio, pigpio.INPUT)
 
@@ -47,7 +45,7 @@ class reader:
       try:
          self._pwm_on = bool(self.pi.read(self.pwmgpio))
          if level == 2:
-            if tick - self._lastpwm > self.WATCHDOG * 1000 / 2:
+            if tick - self._lastpwm > self.WATCHDOG * 1000:
                if self._pwm_on:
                   self._duty = 100
                else:
