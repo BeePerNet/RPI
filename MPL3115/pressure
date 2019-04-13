@@ -1,5 +1,5 @@
 #! /bin/sh
-# (c) 2013 - LGPL - Steve Schnepp <steve.schnepp@pwkf.org>
+# (c) 2019 - LGPL - BeePerNet
 
 
 if [ ! -r "/dev/shm/MPL3115-pressure" ]
@@ -15,7 +15,7 @@ then
 graph_title Pressure
 graph_category sensors
 graph_vlabel Pa
-thermal_zone0.label Ambiant Pressure
+press0.label Ambiant Pressure
 EOF
         exit 0
 fi
@@ -23,6 +23,6 @@ fi
 # values
 TEMP_MILLI_C=$(cat /dev/shm/MPL3115-pressure)
 
-echo "thermal_zone0.value $(echo "$TEMP_MILLI_C" | awk '{printf("%0.3f", $1)}')"
+echo "press0.value $(echo "$TEMP_MILLI_C" | awk '{printf("%0.3f", $1)}')"
 
 exit 0
