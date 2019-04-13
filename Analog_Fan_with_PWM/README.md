@@ -1,6 +1,6 @@
 WARNING: This is not the best way to connect a motor to Raspberry PI.
 
-Control an analog computer fan with PWM and read the RPM
+Control an analog computer fan with PWM and read the RPM with only 3 wire: Power, ground and hall effect sensor.
 
 For GPIO, we have to deal with that:
 
