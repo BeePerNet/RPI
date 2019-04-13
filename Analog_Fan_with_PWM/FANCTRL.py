@@ -255,9 +255,6 @@ if __name__ == "__main__":
 
    try:
 
-      # Intervals of about 2 seconds or less will eventually hang the DHT22.
-      INTERVAL = 2
-
       pi = pigpio.pi()
 
       s = FANCTRL.fanctrl(pi, 18, 6, filename="/dev/shm/FANCTRL")
