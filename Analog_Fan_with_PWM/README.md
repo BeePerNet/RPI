@@ -1,3 +1,5 @@
+WARNING: This is not the best way to connect a motor to Raspberry PI.
+
 Control an analog computer fan with PWM and read the RPM
 
 For GPIO, we have to deal with that:
